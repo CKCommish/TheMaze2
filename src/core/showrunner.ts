@@ -13,12 +13,12 @@ import type { VoteEngine } from "./votes.js";
  *
  *   beat N plays for exactly 45 s as three 15 s slots
  *   ├─ slot 0  (0–15 s)   the setup
- *   ├─ slot 1  (15–30 s)  the action — the VOTE opens at 15 s (30 s left) and closes at 20 s (25 s left)
+ *   ├─ slot 1  (15–30 s)  the action — the VOTE opens at 15 s (30 s left) and closes at 25 s (20 s left)
  *   └─ slot 2  (30–45 s)  the turn / cliffhanger, written to work for all three choices
  *
  * While beat N plays, the three possible beat N+1s are already being written (and, with speculation
  * on, their opening keyframes painted). The moment the vote closes, the winner's first clip starts
- * rendering with 25 s to spare. If any clip is late, a filler establishing shot plays and the real
+ * rendering with 20 s to spare. If any clip is late, a filler establishing shot plays and the real
  * clip cuts in as soon as it lands. If the audience does not vote, option A wins by default.
  */
 
@@ -71,7 +71,7 @@ export class Showrunner extends Emitter<ShowrunnerEvents> {
   constructor(private readonly deps: ShowrunnerDeps) {
     super();
     this.config = { ...DEFAULT_SHOW_CONFIG, ...deps.config, timing: { ...DEFAULT_SHOW_CONFIG.timing, ...deps.config?.timing } };
-    validateTiming(this.config.timing);
+    validateTiming(this.config.timing, this.config.minVoteRemainingMs);
     this.story = deps.story;
   }
 

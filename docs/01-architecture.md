@@ -12,14 +12,14 @@ A beat is 45 seconds = three 15-second slots. Each slot plays one generated clip
 beat N            ┌────── slot 0 ──────┬────── slot 1 ──────┬────── slot 2 ──────┐
                   │ SETUP              │ ACTION             │ TURN → cliffhanger │
                   0s                  15s                  30s                  45s
-vote                                   ├─ opens ─┤ closes
-                                      15s       20s
-                                      (30s left) (25s left)
-next beat's render                                └──── 25 s to land clip 0 of beat N+1 ────┘
+vote                                   ├─── 10 s ───┤ closes
+                                      15s           25s
+                                      (30s left)     (20s left)
+next beat's render                                    └──── 20 s to land clip 0 of beat N+1 ────┘
 ```
 
 - **Setup / Action / Turn.** The chosen action is spread across all three shots. The writer is told: shot 1 sets it up, shot 2 is the action, shot 3 is the consequence and ends on a frozen decision moment that works as the lead-in for all three next options.
-- **The vote is about the NEXT beat**, never the current one. That is what buys the 25 seconds.
+- **The vote opens the moment clip 2 starts and lasts 10 seconds. It decides clip 4**, the first clip of the next beat, never anything in the current beat. That is what buys the 20-second render window. Both numbers are `VOTE_OPENS_AT_SECONDS` and `VOTE_SECONDS` in `.env`; the engine refuses settings that would leave the winner's clip no time to render (20 s minimum for rendered clips, 3 s in Director mode or with `SPECULATION=full`).
 - **No votes → option A wins.** Ties are broken at random.
 
 ## Timeline of the machinery
@@ -28,15 +28,16 @@ next beat's render                                └──── 25 s to land c
 |---|---|
 | N−1 vote closed (−25 s) | Beat N is planned. Immediately, the writer drafts all three candidate beats N+1 (three parallel calls) and, with `SPECULATION=keyframes`, paints the opening keyframe of each candidate's first shot. |
 | 0 s | Beat N on air. Its three clips were started at −25 s; shot 0 is due now, shots 1 and 2 at +15 s and +30 s. A filler for the location beat N ends in is pre-rendered in the background. |
-| 15 s | Vote opens. |
-| 20 s | Vote closes. Winner's first clip starts rendering from its ready keyframe; the two losing candidates are cancelled (fal queue cancel). Its shots 1 and 2 start at the same time (from their own keyframes). |
-| ~38 s | Winner's first clip lands (15–20 s on H3 Max; ~8–10 s on Turbo). |
+| 15 s | Vote opens (clip 2 is on air; clips 1–3 were all created before the beat started). |
+| 25 s | Vote closes. Winner's clip 4 starts rendering from its ready keyframe; the two losing candidates are cancelled (fal queue cancel). Clips 5 and 6 start at the same time (from their own keyframes). |
+| ~40–45 s | Winner's clip 4 lands (15–20 s on H3 Max; ~8–10 s on Turbo). |
 | 45 s | Beat N+1 on air. |
 
-Slack per clip on H3 Max at 20 s per render: shot 0 has ~5 s, shot 1 ~20 s, shot 2 ~35 s. Slack can be bought three ways, all configurable in `.env`:
+Slack on H3 Max at 20 s per render: clip 4 has ~0–5 s (this is the tight one), clip 5 ~20 s, clip 6 ~35 s. Slack can be bought three ways, all configurable in `.env`:
 
-- `TURBO_FOR_DEADLINE=true` renders only the deadline clip on the ~2× faster Turbo tier.
-- `SPECULATION=full` also renders the first clip of all three candidates before the vote closes (zero deadline risk, +2 clips per beat, ~1.7× video cost).
+- `TURBO_FOR_DEADLINE=true` renders only the deadline clip on the ~2× faster Turbo tier (recommended with the 10-second vote).
+- `SPECULATION=full` also renders the first clip of all three candidates before the vote closes (zero deadline risk, +2 clips per beat, ~1.7× video cost). It also allows a later vote, e.g. `VOTE_OPENS_AT_SECONDS=30` (after clip 2 has fully played), because nothing has to render after the result.
+- Director mode has no render deadline at all, so the vote may close as late as 3 s before the beat ends.
 - Shorter clips (`CLIP_SECONDS=10`, beat = 30 s) if you ever want a faster cadence.
 
 ## When something is late or fails

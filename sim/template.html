@@ -73,7 +73,7 @@ header.top .status b { color: var(--red); }
 .clock { position: relative; height: 54px; margin-top: 6px; }
 .clock .track { position: absolute; left: 0; right: 0; top: 18px; height: 10px; background: var(--panel-2); border: 1px solid var(--line); border-radius: 6px; overflow: hidden; }
 .clock .slot { position: absolute; top: 0; bottom: 0; border-left: 1px solid var(--line-strong); }
-.clock .window { position: absolute; top: 0; bottom: 0; left: 33.33%; width: 11.11%; background: rgba(240,166,58,0.45); }
+.clock .window { position: absolute; top: 0; bottom: 0; left: 33.33%; width: 22.22%; background: rgba(240,166,58,0.45); }
 .clock .head { position: absolute; top: 12px; width: 2px; height: 22px; background: #fff; box-shadow: 0 0 8px rgba(255,255,255,0.7); left: 0; }
 .clock .lbl { position: absolute; top: 34px; font-family: var(--mono); font-size: 10.5px; color: var(--muted); transform: translateX(-50%); }
 .clock .lbl.v { color: var(--amber); }
@@ -132,7 +132,7 @@ header.top .status b { color: var(--red); }
         <div class="tiktop"><span class="livepill">LIVE</span><span id="viewers">1.8K</span><span class="handle">@themaze</span></div>
         <div class="toasts" id="toasts"></div>
         <div class="vote" id="vote">
-          <div class="vh"><span>WHAT HAPPENS NEXT?</span><b id="count">5</b></div>
+          <div class="vh"><span>WHAT HAPPENS NEXT?</span><b id="count">10</b></div>
           <div class="vbar"><i id="vbar"></i></div>
           <div id="vopts"></div>
           <div class="vfoot">Send the gift to vote · any gift after you pick adds to it · biggest total wins</div>
@@ -147,9 +147,9 @@ header.top .status b { color: var(--red); }
         <div class="clock">
           <div class="track"><div class="slot" style="left:33.33%"></div><div class="slot" style="left:66.66%"></div><div class="window"></div></div>
           <div class="head" id="head"></div>
-          <div class="lbl" style="left:0">0 s · setup</div><div class="lbl v" style="left:38.9%">vote 15–20 s</div><div class="lbl" style="left:66.66%">30 s · turn</div><div class="lbl" style="left:100%">45 s</div>
+          <div class="lbl" style="left:0">0 s · setup</div><div class="lbl v" style="left:44.4%">vote 15–25 s</div><div class="lbl" style="left:66.66%">30 s · turn</div><div class="lbl" style="left:100%">45 s</div>
         </div>
-        <div class="legend"><span><i style="background:rgba(240,166,58,0.6)"></i>vote window (30 s → 25 s left)</span><span><i style="background:#fff"></i>now</span><span id="renderlbl"></span></div>
+        <div class="legend"><span><i style="background:rgba(240,166,58,0.6)"></i>10-second vote (30 s → 20 s left)</span><span><i style="background:#fff"></i>now</span><span id="renderlbl"></span></div>
       </section>
 
       <section class="panel">
@@ -199,7 +199,7 @@ header.top .status b { color: var(--red); }
     </div>
   </div>
 
-  <p class="foot"><b>How it works.</b> One beat is 45 seconds: three 15-second shots (setup, action, turn). The vote opens with 30 seconds left and closes with 25 left, so the winning option’s first clip has 25 seconds to render before the next beat starts. If a clip is late, an establishing shot plays and the real clip cuts in. If nobody votes, option A wins. The winning option is the one with the highest total gift value.</p>
+  <p class="foot"><b>How it works.</b> One beat is 45 seconds: three 15-second shots (setup, action, turn). The vote opens the moment the second shot starts (30 seconds left), lasts 10 seconds, and decides the fourth clip: the first shot of the next beat, which has 20 seconds to render. If a clip is late, an establishing shot plays and the real clip cuts in. If nobody votes, option A wins. The winning option is the one with the highest total gift value.</p>
 </div>
 
 <script>/*__SIM_JS__*/</script>

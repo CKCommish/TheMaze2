@@ -6,16 +6,23 @@ import { harness, startShow } from "./helpers.js";
 test("default timing obeys the 20–30 seconds-remaining vote rule", () => {
   validateTiming(DEFAULT_TIMING);
   assert.equal(DEFAULT_TIMING.beatMs - DEFAULT_TIMING.voteOpensAtMs, 30_000);
-  assert.equal(DEFAULT_TIMING.beatMs - (DEFAULT_TIMING.voteOpensAtMs + DEFAULT_TIMING.voteDurationMs), 25_000);
+  assert.equal(DEFAULT_TIMING.beatMs - (DEFAULT_TIMING.voteOpensAtMs + DEFAULT_TIMING.voteDurationMs), 20_000);
+  assert.equal(DEFAULT_TIMING.voteDurationMs, 10_000);
+});
+
+test("a late vote (after clip 2 has played) is allowed only when the render budget is relaxed", () => {
+  const late = { ...DEFAULT_TIMING, voteOpensAtMs: 30_000, voteDurationMs: 10_000 }; // closes with 5 s left
+  assert.throws(() => validateTiming(late), /too late/);
+  validateTiming(late, 3_000); // SPECULATION=full or Director mode
 });
 
 test("timing validation rejects votes outside the window", () => {
   assert.throws(() => validateTiming({ ...DEFAULT_TIMING, voteOpensAtMs: 10_000 }), /too early/);
-  assert.throws(() => validateTiming({ ...DEFAULT_TIMING, voteOpensAtMs: 24_000 }), /too late/);
+  assert.throws(() => validateTiming({ ...DEFAULT_TIMING, voteOpensAtMs: 20_000 }), /too late/);
   assert.throws(() => validateTiming({ ...DEFAULT_TIMING, clipMs: 20_000 }), /multiple/);
 });
 
-test("beats are exactly 45 s, three 15 s slots, vote opens with 30 s left and closes with 25 s left", async () => {
+test("beats are exactly 45 s, three 15 s slots, vote opens with 30 s left and closes with 20 s left", async () => {
   const h = harness();
   const t0 = await startShow(h);
   await h.clock.advance(45_000 * 4 + 1);
@@ -31,8 +38,8 @@ test("beats are exactly 45 s, three 15 s slots, vote opens with 30 s left and cl
     const beatStart = beats[i].at;
     const beatEnd = beatStart + 45_000;
     assert.equal(beatEnd - opens[i].at, 30_000, "vote opens with 30 s remaining");
-    assert.equal(beatEnd - closes[i].at, 25_000, "vote closes with 25 s remaining");
-    assert.equal(closes[i].at - opens[i].at, 5_000, "5 seconds to vote");
+    assert.equal(beatEnd - closes[i].at, 20_000, "vote closes with 20 s remaining");
+    assert.equal(closes[i].at - opens[i].at, 10_000, "10 seconds to vote");
   }
 
   const slots = h.events.filter((e) => e.name === "slot").map((e) => ({ at: e.at, np: e.payload as NowPlaying }));
@@ -52,8 +59,8 @@ test("with normal generation speed the next beat's clips are real, not fillers",
 });
 
 test("a late clip is covered by a filler and cuts in when it lands; the clock never slips", async () => {
-  // 30 s per clip: the first clip of beat 1 starts rendering when the vote closes (20 s) and lands at 50 s,
-  // 5 s into its slot. The filler covers those 5 s.
+  // 30 s per clip: the first clip of beat 1 starts rendering when the vote closes (25 s) and lands at 55 s,
+  // 10 s into its slot. The filler covers those 10 s.
   const h = harness({ videoLatency: 30_000, imageLatency: 100 });
   await startShow(h, 31_000);
   const beat0 = h.events.find((e) => e.name === "beat")!.at;
@@ -65,8 +72,8 @@ test("a late clip is covered by a filler and cuts in when it lands; the clock ne
   assert.equal(beat1Slot0[0].np.filler, true);
   assert.equal(beat1Slot0[0].at, beat1.at);
   assert.equal(beat1Slot0[1].np.filler, false);
-  assert.equal(beat1Slot0[1].at, beat1.at + 5_000);
-  assert.equal(beat1Slot0[1].np.clip.durationMs, 10_000, "the real clip plays for the rest of the slot");
+  assert.equal(beat1Slot0[1].at, beat1.at + 10_000);
+  assert.equal(beat1Slot0[1].np.clip.durationMs, 5_000, "the real clip plays for the rest of the slot");
 });
 
 test("when every generation fails the show still runs on fillers at the same cadence", async () => {
@@ -85,11 +92,11 @@ test("the audience's choice becomes the next beat; no votes defaults to A", asyn
   const h = harness();
   await startShow(h);
   // beat 0 vote: cast a vote for C
-  await h.clock.advance(15_000);
+  await h.clock.advance(16_000);
   const open = h.events.filter((e) => e.name === "vote_open").at(-1)!.payload as { choices: { id: string; label: string }[] };
   h.credits.ensureViewer("v1");
   assert.equal(h.votes.cast("v1", "C").ok, true);
-  await h.clock.advance(30_000);
+  await h.clock.advance(29_000);
   const beat1 = h.events.filter((e) => e.name === "beat")[1].payload as { plan: { choiceTaken?: { id: string; label: string } } };
   assert.equal(beat1.plan.choiceTaken?.id, "C");
   assert.equal(beat1.plan.choiceTaken?.label, open.choices[2].label);

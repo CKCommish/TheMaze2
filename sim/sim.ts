@@ -137,7 +137,7 @@ function boot(): void {
     setTimeout(() => winnerEl.classList.remove("show"), 5000);
     logEntry("vote", `Vote after beat ${r.beatIndex}`, `<b>${r.choice.id}) ${esc(r.choice.label)}</b> wins with ${r.result.tally[r.result.winner].toLocaleString()} coins (A ${r.result.tally.A} · B ${r.result.tally.B} · C ${r.result.tally.C}). ${r.result.reason === "no-votes-default" ? "Nobody voted, so the careful option won by default." : r.result.reason === "tiebreak-random" ? "Tie, broken at random." : ""}`);
     hintEl.className = "hint";
-    hintEl.textContent = "Vote closed. The winner's first clip is rendering now, with 25 seconds to spare.";
+    hintEl.textContent = "Vote closed. The winner's clip 4 is rendering now, with 20 seconds to spare.";
   });
   showrunner.start().catch((e) => ($("status").textContent = `failed: ${e.message}`));
 }

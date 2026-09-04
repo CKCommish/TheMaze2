@@ -105,6 +105,20 @@ export function createShowServer(opts: ShowServerOptions): ShowServer {
   showrunner.on("vote_closed", (r) => broadcast({ type: "vote_closed", ...r }));
   showrunner.on("log", (l) => broadcast({ type: "log", ...l }));
 
+  const castExternal = (source: VoteSource, userId: string, text: string, displayName?: string) => {
+    const r = votes.select(userId, text, source);
+    if (r.ok) {
+      showrunner.notifyTally();
+      broadcast({ type: "external_vote", source, displayName: displayName ?? userId, choiceId: parseChoiceForDisplay(text) });
+    }
+  };
+  const giftExternal = (source: VoteSource, userId: string, coins: number, giftName?: string, displayName?: string) => {
+    const selects = giftSelects(opts.giftMap, giftName);
+    const credited = votes.gift({ userId, source, coins, selects, giftName, displayName });
+    showrunner.notifyTally();
+    broadcast({ type: "gift", source, displayName: displayName ?? userId, coins, giftName, choiceId: credited ?? null });
+  };
+
   // ---- HTTP ----
   const server = http.createServer(async (req, res) => {
     try {
@@ -132,6 +146,20 @@ export function createShowServer(opts: ShowServerOptions): ShowServer {
         credits.ensureViewer(viewerId);
         const balance = credits.grant(viewerId, Math.min(100, Math.max(1, Number(body.amount ?? 10))), "dev-grant");
         return sendJson(res, 200, { ok: true, balance });
+      }
+      // Demo only: pretend a TikTok viewer sent a gift or a comment, so the overlay can be seen without going live.
+      if (req.method === "POST" && url.pathname === "/api/dev/gift") {
+        if (!opts.devGrants) return sendJson(res, 403, { ok: false, reason: "disabled" });
+        const body = JSON.parse((await readBody(req)) || "{}");
+        const coins = Math.max(1, Math.min(100_000, Number(body.coins ?? 1)));
+        giftExternal("tiktok", String(body.userId ?? "tester"), coins, body.giftName ? String(body.giftName) : undefined, body.displayName ? String(body.displayName) : undefined);
+        return sendJson(res, 200, { ok: true, tally: votes.tally(), open: votes.isOpen() });
+      }
+      if (req.method === "POST" && url.pathname === "/api/dev/chat") {
+        if (!opts.devGrants) return sendJson(res, 403, { ok: false, reason: "disabled" });
+        const body = JSON.parse((await readBody(req)) || "{}");
+        castExternal("tiktok", String(body.userId ?? "tester"), String(body.text ?? ""), body.displayName ? String(body.displayName) : undefined);
+        return sendJson(res, 200, { ok: true, tally: votes.tally(), open: votes.isOpen() });
       }
       if (req.method === "POST" && url.pathname === "/webhooks/stripe") {
         const raw = await readBody(req);
@@ -196,20 +224,6 @@ export function createShowServer(opts: ShowServerOptions): ShowServer {
   });
 
   server.listen(opts.port, () => log(`web player on http://localhost:${opts.port}  (TV overlay: /?tv=1)`));
-
-  const castExternal = (source: VoteSource, userId: string, text: string, displayName?: string) => {
-    const r = votes.select(userId, text, source);
-    if (r.ok) {
-      showrunner.notifyTally();
-      broadcast({ type: "external_vote", source, displayName: displayName ?? userId, choiceId: parseChoiceForDisplay(text) });
-    }
-  };
-  const giftExternal = (source: VoteSource, userId: string, coins: number, giftName?: string, displayName?: string) => {
-    const selects = giftSelects(opts.giftMap, giftName);
-    const credited = votes.gift({ userId, source, coins, selects, giftName, displayName });
-    showrunner.notifyTally();
-    broadcast({ type: "gift", source, displayName: displayName ?? userId, coins, giftName, choiceId: credited ?? null });
-  };
 
   return { server, castExternal, giftExternal, broadcast, close: () => { wss.close(); server.close(); } };
 }

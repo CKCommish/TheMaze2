@@ -50,6 +50,7 @@ function handle(msg) {
       settings = { ...settings, ...msg.settings };
       app.dataset.aspect = settings.aspectRatio;
       els.getcredits.hidden = !settings.devGrants || TV;
+      $("simpanel").hidden = !settings.devGrants || TV;
       if (msg.viewer) setCredits(msg.viewer.credits);
       if (settings.renderer === "director" && DIRECTOR && !directorStarted) startDirector();
       const s = msg.snapshot;
@@ -273,6 +274,29 @@ els.unmute.onclick = () => {
   if (activeVideo) activeVideo.play().catch(() => {});
 };
 els.togglelog.onclick = () => { app.dataset.log = app.dataset.log === "1" ? "0" : "1"; };
+
+// ---------- simulate TikTok (demo mode) ----------
+const BOTS = ["mira_k", "dozer99", "ivy.ivy", "nightowl", "kap", "rae_fan", "harborcat", "j0el", "pixelpete", "lulu"];
+let simUser = "you";
+async function simGift(giftName, coins, userId = simUser, displayName = userId) {
+  const r = await fetch("/api/dev/gift", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ userId, coins, giftName, displayName }) }).then((x) => x.json()).catch(() => null);
+  if (r && !r.open) els.err.textContent = "The vote is not open right now (it opens 15 s into each beat).";
+}
+async function simChat(text, userId = simUser) {
+  await fetch("/api/dev/chat", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ userId, text, displayName: userId }) }).catch(() => {});
+}
+for (const b of document.querySelectorAll("#simpanel [data-gift]")) b.onclick = () => simGift(b.dataset.gift, Number(b.dataset.coins));
+for (const b of document.querySelectorAll("#simpanel [data-chat]")) b.onclick = () => simChat(b.dataset.chat);
+const crowdBtn = $("simcrowd");
+if (crowdBtn) crowdBtn.onclick = () => {
+  const gifts = [["Rose", 1], ["GG", 1], ["Ice Cream Cone", 1], ["Finger Heart", 5], ["Perfume", 20]];
+  for (let i = 0; i < 12; i++) setTimeout(() => {
+    const who = BOTS[Math.floor(Math.random() * BOTS.length)];
+    const [g, c] = gifts[Math.floor(Math.random() * gifts.length)];
+    if (g === "Finger Heart" || g === "Perfume") simChat(String(1 + Math.floor(Math.random() * 3)), who).then(() => simGift(g, c, who));
+    else simGift(g, c, who);
+  }, i * 350);
+};
 
 // ---------- log ----------
 function logEntry(kind, k, html) {

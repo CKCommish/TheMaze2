@@ -27,14 +27,18 @@ export interface Timing {
 export const DEFAULT_TIMING: Timing = {
   beatMs: 45_000,
   clipMs: 15_000,
-  voteOpensAtMs: 15_000, // 30 s remaining
-  voteDurationMs: 5_000, // closes with 25 s remaining
+  voteOpensAtMs: 15_000, // 30 s remaining: opens the moment clip 2 starts
+  voteDurationMs: 10_000, // closes with 20 s remaining; the winner becomes clip 4 (the next beat's first clip)
   readyMarginMs: 750,
   minCutInMs: 3_000,
   coldStartMaxMs: 60_000,
 };
 
-/** The user's rule: the vote must happen while 20–30 seconds of the beat remain. */
+/**
+ * The rule: the vote opens no earlier than 30 s before the beat ends (clip 2 must be on air) and closes
+ * with at least `minRemainingMs` left so the winner's first clip can render. 20 s is right for rendered
+ * clips; with SPECULATION=full or Director mode the show can allow a much later close (see ShowConfig).
+ */
 export const VOTE_WINDOW_RULE = { minRemainingMs: 20_000, maxRemainingMs: 30_000 };
 
 export function slotsPerBeat(t: Timing): number {
@@ -42,7 +46,7 @@ export function slotsPerBeat(t: Timing): number {
 }
 
 /** Throws if the timing breaks the show's rules. Called once at startup and in tests. */
-export function validateTiming(t: Timing): void {
+export function validateTiming(t: Timing, minRemainingMs: number = VOTE_WINDOW_RULE.minRemainingMs): void {
   if (t.beatMs % t.clipMs !== 0) {
     throw new Error(`beatMs (${t.beatMs}) must be a whole multiple of clipMs (${t.clipMs})`);
   }
@@ -51,8 +55,8 @@ export function validateTiming(t: Timing): void {
   if (remainingAtOpen > VOTE_WINDOW_RULE.maxRemainingMs) {
     throw new Error(`vote opens too early: ${remainingAtOpen} ms remain (max ${VOTE_WINDOW_RULE.maxRemainingMs})`);
   }
-  if (remainingAtClose < VOTE_WINDOW_RULE.minRemainingMs) {
-    throw new Error(`vote closes too late: ${remainingAtClose} ms remain (min ${VOTE_WINDOW_RULE.minRemainingMs})`);
+  if (remainingAtClose < minRemainingMs) {
+    throw new Error(`vote closes too late: ${remainingAtClose} ms remain (min ${minRemainingMs})`);
   }
   if (t.voteDurationMs <= 0 || t.readyMarginMs < 0 || t.minCutInMs < 0) {
     throw new Error("timing values must be positive");
@@ -73,6 +77,8 @@ export interface ShowConfig {
   chatVotePolicy: "free" | "requires_credits";
   /** How many past beats the planner remembers in detail. */
   memoryBeats: number;
+  /** Least time that may remain in a beat when the vote closes (render budget for the winner's first clip). */
+  minVoteRemainingMs: number;
 }
 
 export const DEFAULT_SHOW_CONFIG: ShowConfig = {
@@ -82,4 +88,5 @@ export const DEFAULT_SHOW_CONFIG: ShowConfig = {
   starterCredits: 3,
   chatVotePolicy: "free",
   memoryBeats: 8,
+  minVoteRemainingMs: VOTE_WINDOW_RULE.minRemainingMs,
 };

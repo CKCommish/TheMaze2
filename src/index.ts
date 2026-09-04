@@ -126,13 +126,27 @@ const voteCost = Number(env("VOTE_COST", "1"));
 const votes = new VoteEngine({ clock, credits, mode: voteMode, voteCost, chatVotePolicy: env("CHAT_VOTE_POLICY", "free") === "requires_credits" ? "requires_credits" : "free", chatVoteValue: Number(env("CHAT_VOTE_VALUE", "1")) });
 
 // ---- the show ----
+const speculation: Speculation = renderer === "director" ? "none" : (env("SPECULATION", "keyframes") as Speculation);
+// With nothing to render after the vote (Director) or everything pre-rendered (full speculation), the vote may close late.
+const minVoteRemainingMs = renderer === "director" || speculation === "full" ? 3_000 : 20_000;
 const showrunner = new Showrunner({
   clock,
   planner,
   pipeline,
   votes,
   story,
-  config: { speculation: renderer === "director" ? "none" : (env("SPECULATION", "keyframes") as Speculation), voteCost, starterCredits: Number(env("STARTER_CREDITS", "3")), timing: { clipMs: clipSeconds * 1000, beatMs: clipSeconds * 3000 } },
+  config: {
+    speculation,
+    voteCost,
+    starterCredits: Number(env("STARTER_CREDITS", "3")),
+    minVoteRemainingMs,
+    timing: {
+      clipMs: clipSeconds * 1000,
+      beatMs: clipSeconds * 3000,
+      voteOpensAtMs: Number(env("VOTE_OPENS_AT_SECONDS", "15")) * 1000,
+      voteDurationMs: Number(env("VOTE_SECONDS", "10")) * 1000,
+    },
+  },
   log,
 });
 

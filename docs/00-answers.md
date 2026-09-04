@@ -40,12 +40,12 @@ The clock, every beat:
 | Time | What happens |
 |---|---|
 | 0:00 | Beat N starts. The writer is already drafting all three possible next beats and painting their opening keyframes. |
-| 0:15 | Vote opens (30 s left). Shot 2 is playing. |
-| 0:20 | Vote closes (25 s left). The winner's first clip starts rendering; the two losers are cancelled. |
-| ~0:38 | The winner's first clip lands (15–20 s render). |
-| 0:45 | Beat N+1 starts with a real clip. Its shots 2 and 3 have 40–55 s of slack. |
+| 0:15 | Vote opens (30 s left), the moment clip 2 starts playing. Clips 1–3 were created before the beat began. |
+| 0:25 | Vote closes after 10 seconds (20 s left). The winner's clip 4 starts rendering; the two losers are cancelled. |
+| ~0:40–0:45 | Clip 4 lands (15–20 s render; ~8–10 s on the Turbo tier, which I recommend for this one clip). |
+| 0:45 | Beat N+1 starts with clip 4. Clips 5 and 6 have 20–35 s of slack. |
 
-If a clip is late, an establishing shot of the current location (pre-rendered in the background) plays and the real clip cuts in the moment it lands. If it never lands, the filler covers the slot and the story text still advances. If nobody votes, option A wins. The tests in `test/timing.test.ts` prove all of this on a fake clock, including the "every render fails" case, where the show keeps its 45-second cadence on fillers alone.
+Both numbers are settings (`VOTE_OPENS_AT_SECONDS`, `VOTE_SECONDS`). If you want the vote after clip 2 has fully played (opening at 30 s), the winner's clip must already be rendered when the vote closes: turn on `SPECULATION=full` (all three candidate clips are rendered during the vote, about 1.7× the video cost) or use Director mode. If a clip is late, an establishing shot of the current location (pre-rendered in the background) plays and the real clip cuts in the moment it lands. If it never lands, the filler covers the slot and the story text still advances. If nobody votes, option A wins. The tests in `test/timing.test.ts` prove all of this on a fake clock, including the "every render fails" case, where the show keeps its 45-second cadence on fillers alone.
 
 ## 4. Free to watch, gifts are votes, value wins
 

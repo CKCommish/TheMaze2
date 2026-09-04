@@ -4,14 +4,14 @@
 
 This repository holds the plan, the research, and a working engine:
 
-- **The engine runs the clock.** 45-second beats, three 15-second clips each, a 5-second vote that opens with 30 seconds left, and a "never stop" rule: if a clip is late, a filler shot plays and the real clip cuts in when it lands. Proven by tests that run the whole loop on a fake clock.
+- **The engine runs the clock.** 45-second beats, three 15-second clips each, a 10-second vote that opens when the second clip starts and decides the fourth, and a "never stop" rule: if a clip is late, a filler shot plays and the real clip cuts in when it lands. Proven by tests that run the whole loop on a fake clock.
 - **The writer** (Claude) turns each audience choice into three shots and writes the next three choices, keeping a persistent world (location, heat, cash, allies, open threads).
 - **The renderer** (fal.ai "H3 Max", the post-trained MiniMax model you asked about) turns each shot into a 15-second clip with sound and dialogue, from a keyframe painted from the character's locked reference photos so the cast stays consistent.
 - **Director mode** (`RENDERER=director`) runs the same show on fal's continuous H3 Max Director stream instead of clips; see [docs/08-director-mode.md](docs/08-director-mode.md).
 - **The vote** counts value, not heads: every gift adds its coin value to an option; a comment "1/2/3" picks where later gifts go.
 - **The player/overlay** is a web page: viewers use it on the website, and TikTok LIVE Studio or OBS captures it as the stream.
 
-Start with **[docs/00-answers.md](docs/00-answers.md)** for plain-English answers to the questions that started this project, and my recommendation.
+Start with **[docs/00-answers.md](docs/00-answers.md)** for plain-English answers to the questions that started this project, and **[docs/09-go-live-on-tiktok.md](docs/09-go-live-on-tiktok.md)** for the step-by-step TikTok hookup.
 
 ## Run the free demo (no API keys)
 
