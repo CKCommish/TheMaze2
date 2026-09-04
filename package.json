@@ -1,0 +1,37 @@
+{
+  "name": "themaze",
+  "version": "0.1.0",
+  "private": true,
+  "description": "The Maze: a procedurally generated, audience-voted live show that plays like a video game.",
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "demo": "node scripts/build-web.mjs && tsx src/index.ts",
+    "start": "node dist/index.js",
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "node --import tsx --test test/*.test.ts",
+    "sim:build": "node scripts/build-sim.mjs",
+    "cast": "tsx scripts/make-cast.ts",
+    "probe": "tsx scripts/probe.ts",
+    "build:web": "node scripts/build-web.mjs"
+  },
+  "license": "UNLICENSED",
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.123.0",
+    "@fal-ai/client": "^1.10.1",
+    "fal-client-alpha": "npm:@fal-ai/client@^1.11.0-alpha.2",
+    "tiktok-live-connector": "^2.4.4",
+    "ws": "^8.21.3",
+    "zod": "^4.5.4"
+  },
+  "devDependencies": {
+    "@types/node": "^26.4.1",
+    "@types/ws": "^8.18.1",
+    "esbuild": "^0.28.2",
+    "tsx": "^4.23.13",
+    "typescript": "^7.0.2"
+  }
+}

@@ -1,0 +1,205 @@
+<title>The Maze Simulator</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+:root {
+  --ground: #0a0d12; --panel: #111820; --panel-2: #0d131a; --line: rgba(255,255,255,0.09); --line-strong: rgba(255,255,255,0.18);
+  --ink: #eaf0f6; --muted: #8c99a8; --amber: #f0a63a; --teal: #37c7bf; --violet: #b78bff; --pink: #ff5f8f; --red: #e5484d;
+  --display: "Barlow Condensed", "Arial Narrow", Impact, sans-serif; --body: "IBM Plex Sans", "Helvetica Neue", Arial, sans-serif; --mono: "IBM Plex Mono", Menlo, Consolas, monospace;
+}
+html { color-scheme: dark; }
+body { margin: 0; background: var(--ground); color: var(--ink); font-family: var(--body); font-size: 14px; line-height: 1.45; }
+button { font: inherit; color: inherit; cursor: pointer; }
+.wrap { max-width: 1180px; margin: 0 auto; padding: 28px 20px 60px; }
+header.top { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; flex-wrap: wrap; margin-bottom: 18px; }
+header.top h1 { font-family: var(--display); font-weight: 700; font-size: 40px; letter-spacing: 0.02em; margin: 0; line-height: 1; text-wrap: balance; }
+header.top h1 small { display: block; font-family: var(--body); font-weight: 400; font-size: 14px; color: var(--muted); letter-spacing: 0; margin-top: 6px; }
+header.top .status { font-family: var(--mono); font-size: 12px; color: var(--muted); }
+header.top .status b { color: var(--red); }
+.grid { display: grid; grid-template-columns: 400px 1fr; gap: 26px; align-items: start; }
+@media (max-width: 860px) { .grid { grid-template-columns: 1fr; } }
+
+/* phone */
+.phone { position: relative; width: 100%; aspect-ratio: 9 / 16; background: #000; border-radius: 34px; border: 1px solid var(--line-strong); box-shadow: 0 30px 80px rgba(0,0,0,0.6), inset 0 0 0 6px #141a22; overflow: hidden; }
+.screen { position: absolute; inset: 6px; border-radius: 28px; overflow: hidden; background:
+  radial-gradient(120% 80% at 15% 8%, rgba(240,166,58,0.16), transparent 55%),
+  radial-gradient(90% 70% at 85% 92%, rgba(55,199,191,0.18), transparent 60%),
+  linear-gradient(180deg, #0e151d 0%, #070a0e 100%); }
+.rain { position: absolute; inset: -20%; background: repeating-linear-gradient(112deg, rgba(255,255,255,0.045) 0 2px, transparent 2px 15px); animation: rain 1.5s linear infinite; pointer-events: none; }
+@keyframes rain { from { transform: translateY(-48px); } to { transform: none; } }
+@media (prefers-reduced-motion: reduce) { .rain { animation: none; } }
+.tiktop { position: absolute; top: 14px; left: 14px; right: 14px; display: flex; align-items: center; gap: 8px; font-family: var(--mono); font-size: 11px; color: var(--muted); }
+.livepill { background: var(--red); color: #fff; font-family: var(--display); font-weight: 700; letter-spacing: 0.12em; font-size: 12px; padding: 2px 7px; border-radius: 4px; }
+.tiktop .handle { margin-left: auto; color: var(--ink); }
+.shot { position: absolute; left: 0; right: 0; top: 0; bottom: 0; padding: 22% 8% 50%; display: flex; flex-direction: column; justify-content: flex-end; }
+.shot .beatno { position: absolute; top: 9%; right: 8%; font-family: var(--display); font-weight: 700; font-size: 64px; color: rgba(255,255,255,0.14); line-height: 1; }
+.shot .role { font-family: var(--mono); font-size: 10.5px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--amber); }
+.shot .role.filler { color: var(--teal); }
+.shot .loc { font-family: var(--mono); font-size: 10.5px; color: var(--muted); margin-top: 4px; }
+.shot .text { font-family: var(--display); font-weight: 600; font-size: 21px; line-height: 1.12; margin-top: 8px; text-shadow: 0 2px 18px rgba(0,0,0,0.7); text-wrap: pretty; display: -webkit-box; -webkit-line-clamp: 5; -webkit-box-orient: vertical; overflow: hidden; }
+.shot .prog { position: absolute; left: 0; right: 0; bottom: 0; height: 3px; background: rgba(255,255,255,0.1); }
+.shot .prog i { display: block; height: 100%; width: 0; background: var(--amber); }
+.toasts { position: absolute; left: 12px; top: 44px; display: flex; flex-direction: column; gap: 5px; pointer-events: none; max-width: 70%; }
+.toast { background: rgba(0,0,0,0.55); border: 1px solid var(--line); border-radius: 999px; padding: 4px 10px; font-size: 11.5px; animation: toast 3.6s forwards; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.toast b { color: var(--pink); }
+@keyframes toast { 0% { opacity: 0; transform: translateY(8px);} 12% { opacity: 1; transform: none;} 80% { opacity: 1;} 100% { opacity: 0;} }
+.vote { position: absolute; left: 10px; right: 10px; bottom: 12px; background: rgba(8,11,15,0.86); border: 1px solid var(--line-strong); border-radius: 16px; padding: 12px 12px 10px; backdrop-filter: blur(10px); transform: translateY(12px); opacity: 0; transition: opacity 180ms ease, transform 180ms ease; }
+.vote.open { opacity: 1; transform: none; }
+.vote .vh { display: flex; justify-content: space-between; align-items: baseline; }
+.vote .vh span { font-family: var(--display); font-weight: 700; letter-spacing: 0.08em; font-size: 15px; }
+.vote .vh b { font-family: var(--mono); color: var(--amber); font-size: 22px; }
+.vote .vbar { height: 3px; background: rgba(255,255,255,0.1); border-radius: 2px; margin: 8px 0 10px; overflow: hidden; }
+.vote .vbar i { display: block; height: 100%; width: 100%; background: var(--amber); transform-origin: left; }
+.vopt { position: relative; display: grid; grid-template-columns: 30px 1fr auto; gap: 8px; align-items: center; padding: 8px 10px; border: 1px solid var(--line); border-radius: 10px; margin-bottom: 6px; background: rgba(255,255,255,0.03); overflow: hidden; }
+.vopt .ico { font-size: 20px; text-align: center; }
+.vopt .lbl { font-family: var(--display); font-weight: 600; font-size: 17px; line-height: 1.05; }
+.vopt .sub { font-size: 10.5px; color: var(--muted); }
+.vopt .val { font-family: var(--mono); font-size: 11px; color: var(--muted); text-align: right; }
+.vopt .fill { position: absolute; left: 0; bottom: 0; height: 3px; width: 0; transition: width 250ms ease; }
+.vopt[data-id="A"] .fill { background: var(--amber); } .vopt[data-id="B"] .fill { background: var(--teal); } .vopt[data-id="C"] .fill { background: var(--violet); }
+.vopt.win { border-color: #fff; box-shadow: inset 0 0 0 1px #fff; }
+.vote .vfoot { font-size: 10.5px; color: var(--muted); margin-top: 4px; }
+.winner { position: absolute; left: 50%; top: 42%; transform: translate(-50%, -50%); background: rgba(0,0,0,0.72); border: 1px solid var(--line-strong); border-radius: 14px; padding: 12px 18px; text-align: center; opacity: 0; transition: opacity 200ms ease; pointer-events: none; min-width: 60%; }
+.winner.show { opacity: 1; }
+.winner .k { font-family: var(--mono); font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--muted); }
+.winner .v { font-family: var(--display); font-weight: 700; font-size: 24px; margin-top: 2px; }
+.winner .s { font-size: 11px; color: var(--muted); margin-top: 4px; }
+
+/* control room */
+.room { display: flex; flex-direction: column; gap: 18px; }
+.panel { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 16px 18px; }
+.panel h2 { font-family: var(--display); font-weight: 600; font-size: 20px; letter-spacing: 0.04em; margin: 0 0 10px; }
+.panel h2 small { font-family: var(--mono); font-weight: 400; font-size: 11px; color: var(--muted); letter-spacing: 0; margin-left: 8px; }
+.clock { position: relative; height: 54px; margin-top: 6px; }
+.clock .track { position: absolute; left: 0; right: 0; top: 18px; height: 10px; background: var(--panel-2); border: 1px solid var(--line); border-radius: 6px; overflow: hidden; }
+.clock .slot { position: absolute; top: 0; bottom: 0; border-left: 1px solid var(--line-strong); }
+.clock .window { position: absolute; top: 0; bottom: 0; left: 33.33%; width: 11.11%; background: rgba(240,166,58,0.45); }
+.clock .head { position: absolute; top: 12px; width: 2px; height: 22px; background: #fff; box-shadow: 0 0 8px rgba(255,255,255,0.7); left: 0; }
+.clock .lbl { position: absolute; top: 34px; font-family: var(--mono); font-size: 10.5px; color: var(--muted); transform: translateX(-50%); }
+.clock .lbl.v { color: var(--amber); }
+.legend { display: flex; gap: 14px; flex-wrap: wrap; font-family: var(--mono); font-size: 11px; color: var(--muted); margin-top: 8px; }
+.legend i { display: inline-block; width: 10px; height: 10px; border-radius: 2px; vertical-align: -1px; margin-right: 5px; }
+.gifts { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+@media (max-width: 500px) { .gifts { grid-template-columns: repeat(2, 1fr); } }
+.gift { background: var(--panel-2); border: 1px solid var(--line); border-radius: 12px; padding: 10px 8px; text-align: center; transition: border-color 120ms ease, transform 120ms ease; }
+.gift:hover { border-color: var(--line-strong); transform: translateY(-1px); }
+.gift:focus-visible { outline: 2px solid var(--amber); outline-offset: 2px; }
+.gift .e { font-size: 26px; line-height: 1; }
+.gift .n { font-family: var(--display); font-weight: 600; font-size: 16px; margin-top: 6px; }
+.gift .c { font-family: var(--mono); font-size: 11px; color: var(--muted); }
+.gift .t { font-size: 11px; color: var(--muted); margin-top: 2px; }
+.gift[data-sel="A"] .t { color: var(--amber); } .gift[data-sel="B"] .t { color: var(--teal); } .gift[data-sel="C"] .t { color: var(--violet); }
+.chips { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; align-items: center; }
+.chip { background: transparent; border: 1px solid var(--line-strong); border-radius: 999px; padding: 6px 12px; font-size: 12px; }
+.chip:hover { border-color: #fff; }
+.chip:focus-visible { outline: 2px solid var(--amber); outline-offset: 2px; }
+.chip.on { background: var(--amber); color: #111; border-color: var(--amber); }
+.hint { font-size: 12px; color: var(--muted); margin-top: 8px; }
+.hint.err { color: var(--pink); }
+.tally { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.tcell { background: var(--panel-2); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; }
+.tcell .id { font-family: var(--mono); font-size: 11px; letter-spacing: 0.12em; }
+.tcell[data-id="A"] .id { color: var(--amber);} .tcell[data-id="B"] .id { color: var(--teal);} .tcell[data-id="C"] .id { color: var(--violet);}
+.tcell .n { font-family: var(--display); font-weight: 700; font-size: 26px; line-height: 1.1; font-variant-numeric: tabular-nums; }
+.tcell .u { font-family: var(--mono); font-size: 11px; color: var(--muted); }
+.money { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 12px; }
+.money .m { border-top: 1px solid var(--line); padding-top: 8px; }
+.money .k { font-family: var(--mono); font-size: 10.5px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); }
+.money .v { font-family: var(--display); font-weight: 600; font-size: 22px; font-variant-numeric: tabular-nums; }
+.money .v.neg { color: var(--pink); }
+.log { max-height: 260px; overflow: auto; font-size: 12.5px; }
+.log .e { padding: 7px 0; border-bottom: 1px solid var(--line); }
+.log .k { font-family: var(--mono); font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--amber); }
+.log .k.vote { color: var(--violet); } .log .k.warn { color: var(--teal); }
+.log ul { margin: 4px 0 0; padding-left: 16px; color: var(--muted); }
+.settings { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; font-size: 12px; color: var(--muted); }
+.settings select { background: var(--panel-2); color: var(--ink); border: 1px solid var(--line-strong); border-radius: 8px; padding: 5px 8px; font: inherit; }
+.foot { margin-top: 26px; color: var(--muted); font-size: 12.5px; max-width: 70ch; }
+.foot b { color: var(--ink); }
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <h1>THE MAZE<small>A live crime saga the audience steers with gifts. This is the real show engine running in your browser, with storyboard cards standing in for video.</small></h1>
+    <div class="status"><b>●</b> <span id="status">starting…</span></div>
+  </header>
+
+  <div class="grid">
+    <div class="phone" aria-label="Simulated TikTok LIVE stream">
+      <div class="screen">
+        <div class="rain"></div>
+        <div class="shot"><div class="beatno"></div><div class="role">Going live</div><div class="loc">Port Marrow · night · rain</div><div class="text">Rendering the opening shots. The first beat starts the moment its first clip lands.</div><div class="prog"><i></i></div></div>
+        <div class="tiktop"><span class="livepill">LIVE</span><span id="viewers">1.8K</span><span class="handle">@themaze</span></div>
+        <div class="toasts" id="toasts"></div>
+        <div class="vote" id="vote">
+          <div class="vh"><span>WHAT HAPPENS NEXT?</span><b id="count">5</b></div>
+          <div class="vbar"><i id="vbar"></i></div>
+          <div id="vopts"></div>
+          <div class="vfoot">Send the gift to vote · any gift after you pick adds to it · biggest total wins</div>
+        </div>
+        <div class="winner" id="winner"><div class="k">The audience chose</div><div class="v"></div><div class="s"></div></div>
+      </div>
+    </div>
+
+    <div class="room">
+      <section class="panel">
+        <h2>The 45-second beat<small id="beatlbl">beat –</small></h2>
+        <div class="clock">
+          <div class="track"><div class="slot" style="left:33.33%"></div><div class="slot" style="left:66.66%"></div><div class="window"></div></div>
+          <div class="head" id="head"></div>
+          <div class="lbl" style="left:0">0 s · setup</div><div class="lbl v" style="left:38.9%">vote 15–20 s</div><div class="lbl" style="left:66.66%">30 s · turn</div><div class="lbl" style="left:100%">45 s</div>
+        </div>
+        <div class="legend"><span><i style="background:rgba(240,166,58,0.6)"></i>vote window (30 s → 25 s left)</span><span><i style="background:#fff"></i>now</span><span id="renderlbl"></span></div>
+      </section>
+
+      <section class="panel">
+        <h2>Be the audience<small>your gifts count at full coin value</small></h2>
+        <div class="gifts" id="gifts">
+          <button class="gift" data-gift="Rose" data-coins="1" data-sel="A"><div class="e">🌹</div><div class="n">Rose</div><div class="c">1 coin</div><div class="t">picks A</div></button>
+          <button class="gift" data-gift="GG" data-coins="1" data-sel="B"><div class="e">🎮</div><div class="n">GG</div><div class="c">1 coin</div><div class="t">picks B</div></button>
+          <button class="gift" data-gift="Ice Cream Cone" data-coins="1" data-sel="C"><div class="e">🍦</div><div class="n">Ice Cream</div><div class="c">1 coin</div><div class="t">picks C</div></button>
+          <button class="gift" data-gift="Galaxy" data-coins="1000"><div class="e">🌌</div><div class="n">Galaxy</div><div class="c">1,000 coins</div><div class="t">adds to your pick</div></button>
+        </div>
+        <div class="chips">
+          <span style="font-size:12px;color:var(--muted)">Or comment:</span>
+          <button class="chip" data-say="1">“1”</button><button class="chip" data-say="2">“2”</button><button class="chip" data-say="3">“3”</button>
+          <button class="chip" id="crowd" style="margin-left:auto">Simulated crowd: on</button>
+        </div>
+        <div class="hint" id="hint">The vote opens 15 seconds into every beat. Gifts sent outside the window are still revenue, but not votes.</div>
+      </section>
+
+      <section class="panel">
+        <h2>This vote, by value<small>coins, not head count</small></h2>
+        <div class="tally">
+          <div class="tcell" data-id="A"><div class="id">A</div><div class="n" id="tA">0</div><div class="u" id="uA">no gifts yet</div></div>
+          <div class="tcell" data-id="B"><div class="id">B</div><div class="n" id="tB">0</div><div class="u" id="uB">no gifts yet</div></div>
+          <div class="tcell" data-id="C"><div class="id">C</div><div class="n" id="tC">0</div><div class="u" id="uC">no gifts yet</div></div>
+        </div>
+        <div class="money">
+          <div class="m"><div class="k">Gifts this session</div><div class="v" id="mCoins">0 coins</div><div class="u" id="mUsd" style="font-family:var(--mono);font-size:11px;color:var(--muted)">$0.00 paid by viewers</div></div>
+          <div class="m"><div class="k">Your share (~50%)</div><div class="v" id="mShare">$0.00</div><div class="u" style="font-family:var(--mono);font-size:11px;color:var(--muted)">after TikTok’s cut</div></div>
+          <div class="m"><div class="k">Render cost so far</div><div class="v neg" id="mCost">$0.00</div><div class="u" style="font-family:var(--mono);font-size:11px;color:var(--muted)">$3.84 per beat at fal list price</div></div>
+        </div>
+      </section>
+
+      <section class="panel">
+        <h2>Director’s log<small>what the writer and renderer are doing</small></h2>
+        <div class="log" id="log"></div>
+      </section>
+
+      <section class="panel">
+        <h2>Simulation settings</h2>
+        <div class="settings">
+          <label>Render time <select id="render"><option value="3000" selected>fast (3 s)</option><option value="18000">realistic (18 s)</option><option value="30000">slow (30 s, shows fillers)</option></select></label>
+          <label>Clock <select id="speed"><option value="1" selected>real time</option><option value="2">2× faster</option><option value="4">4× faster</option></select></label>
+          <button class="chip" id="restart">Restart</button>
+        </div>
+        <div class="hint">Restarting resets the story. In the real product the writer is Claude and each shot is a 15-second H3 Max clip with sound; here a template writer and storyboard cards keep it free.</div>
+      </section>
+    </div>
+  </div>
+
+  <p class="foot"><b>How it works.</b> One beat is 45 seconds: three 15-second shots (setup, action, turn). The vote opens with 30 seconds left and closes with 25 left, so the winning option’s first clip has 25 seconds to render before the next beat starts. If a clip is late, an establishing shot plays and the real clip cuts in. If nobody votes, option A wins. The winning option is the one with the highest total gift value.</p>
+</div>
+
+<script>/*__SIM_JS__*/</script>

@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>The Maze — live</title>
+<link rel="stylesheet" href="/style.css" />
+</head>
+<body>
+<div id="app" data-aspect="16:9" data-tv="0" data-log="1">
+  <div id="stagewrap">
+    <div id="stage">
+      <video id="vA" playsinline muted preload="auto"></video>
+      <video id="vB" playsinline muted preload="auto"></video>
+      <div id="card">
+        <div class="beatno"></div>
+        <div class="role"></div>
+        <div class="loc"></div>
+        <div class="text"></div>
+        <div class="cam"></div>
+        <div class="progress"><i></i></div>
+      </div>
+      <div id="hud">
+        <div>
+          <div class="title"><span class="live"></span><span id="title">The Maze</span></div>
+          <div class="sub" id="sub">connecting…</div>
+        </div>
+        <div class="right">
+          <button class="chip" id="credits" title="Credits are what you spend to vote">Credits <b>–</b></button>
+          <button class="chip" id="getcredits" hidden>+ Get credits</button>
+          <button class="chip" id="unmute">🔇 Sound</button>
+          <button class="chip" id="togglelog">Director’s log</button>
+        </div>
+      </div>
+      <div id="votebox">
+        <div class="head"><div class="q">What happens next?<span class="beat"></span></div><div class="t">5</div></div>
+        <div class="bar"><i></i></div>
+        <div class="opts"></div>
+        <div class="foot"><span class="hint"></span><span class="err"></span></div>
+      </div>
+      <div id="result"><div class="k">The audience chose</div><div class="v"></div><div class="s"></div></div>
+      <div id="toasts"></div>
+    </div>
+  </div>
+  <aside id="log">
+    <h3>Director’s log</h3>
+    <div class="how">Every <b>45 seconds</b> is one beat of story, made of three 15-second shots. The vote opens with 30 seconds left, you get 5 seconds, and the winning option is rendered while the current beat finishes. The action never stops.</div>
+    <div class="stats" id="stats"></div>
+    <div id="entries"></div>
+  </aside>
+</div>
+<script type="module" src="/app.js"></script>
+</body>
+</html>

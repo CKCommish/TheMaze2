@@ -1,0 +1,11 @@
+node_modules/
+dist/
+.env
+.env.*
+!.env.example
+data/
+*.log
+.DS_Store
+web/sim.bundle.js
+scratch/
+web/director.bundle.js
