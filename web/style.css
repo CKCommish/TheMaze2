@@ -120,3 +120,9 @@ button { font: inherit; }
 #simpanel { margin: 0 0 12px; padding-bottom: 12px; border-bottom: 1px solid rgba(255,255,255,0.08); }
 #simpanel .simrow { display: flex; flex-wrap: wrap; gap: 6px; }
 #simpanel .chip { font-size: 11.5px; padding: 6px 10px; }
+
+/* portrait (TikTok): keep the story text in the upper half and gift toasts above the vote panel */
+#app[data-aspect="9:16"] #card { justify-content: flex-start; padding-top: 15%; }
+#app[data-aspect="9:16"] #card .beatno { top: 6%; }
+#app[data-aspect="9:16"] #toasts { bottom: auto; top: 46%; }
+#app[data-aspect="9:16"] #result { top: 38%; }

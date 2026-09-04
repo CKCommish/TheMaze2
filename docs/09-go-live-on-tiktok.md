@@ -48,6 +48,8 @@ Test it: have a friend send a Rose during a vote. Their name appears as a toast 
 
 ## What viewers see on TikTok
 
+![The vote panel during the 10-second window](tiktok-overlay-vote.png) ![The result card when the vote closes](tiktok-overlay-result.png)
+
 Everything is drawn into the video, because TikTok does not allow custom buttons in its player:
 
 - **Between votes:** the story, with a small line at the top (beat number, time left, location).
