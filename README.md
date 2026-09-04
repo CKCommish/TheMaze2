@@ -8,7 +8,7 @@ This repository holds the plan, the research, and a working engine:
 - **The writer** (Claude) turns each audience choice into three shots and writes the next three choices, keeping a persistent world (location, heat, cash, allies, open threads).
 - **The renderer** (fal.ai "H3 Max", the post-trained MiniMax model you asked about) turns each shot into a 15-second clip with sound and dialogue, from a keyframe painted from the character's locked reference photos so the cast stays consistent.
 - **Director mode** (`RENDERER=director`) runs the same show on fal's continuous H3 Max Director stream instead of clips; see [docs/08-director-mode.md](docs/08-director-mode.md).
-- **The vote** counts value, not heads: every gift adds its coin value to an option; a comment "1/2/3" picks where later gifts go.
+- **The vote** is gifts only and counts value, not heads: a Rose picks A (GG = B, Ice Cream = C) and every later gift from that viewer adds to their pick. Comments do nothing.
 - **The player/overlay** is a web page: viewers use it on the website, and TikTok LIVE Studio or OBS captures it as the stream.
 
 Start with **[docs/00-answers.md](docs/00-answers.md)** for plain-English answers to the questions that started this project, and **[docs/09-go-live-on-tiktok.md](docs/09-go-live-on-tiktok.md)** for the step-by-step TikTok hookup.

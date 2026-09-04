@@ -135,7 +135,7 @@ header.top .status b { color: var(--red); }
           <div class="vh"><span>WHAT HAPPENS NEXT?</span><b id="count">10</b></div>
           <div class="vbar"><i id="vbar"></i></div>
           <div id="vopts"></div>
-          <div class="vfoot">Send the gift to vote · any gift after you pick adds to it · biggest total wins</div>
+          <div class="vfoot">Send the gift to vote · every gift after that adds to your pick · biggest total wins</div>
         </div>
         <div class="winner" id="winner"><div class="k">The audience chose</div><div class="v"></div><div class="s"></div></div>
       </div>
@@ -161,11 +161,10 @@ header.top .status b { color: var(--red); }
           <button class="gift" data-gift="Galaxy" data-coins="1000"><div class="e">🌌</div><div class="n">Galaxy</div><div class="c">1,000 coins</div><div class="t">adds to your pick</div></button>
         </div>
         <div class="chips">
-          <span style="font-size:12px;color:var(--muted)">Or comment:</span>
-          <button class="chip" data-say="1">“1”</button><button class="chip" data-say="2">“2”</button><button class="chip" data-say="3">“3”</button>
+          <span style="font-size:12px;color:var(--muted)">Gifts are the only vote. Comments do nothing.</span>
           <button class="chip" id="crowd" style="margin-left:auto">Simulated crowd: on</button>
         </div>
-        <div class="hint" id="hint">The vote opens 15 seconds into every beat. Gifts sent outside the window are still revenue, but not votes.</div>
+        <div class="hint" id="hint">The vote opens 15 seconds into every beat and lasts 10. A Galaxy sent before you pick waits until you send a Rose, GG or Ice Cream, then lands on that option.</div>
       </section>
 
       <section class="panel">

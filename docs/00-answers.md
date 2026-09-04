@@ -51,8 +51,8 @@ Both numbers are settings (`VOTE_OPENS_AT_SECONDS`, `VOTE_SECONDS`). If you want
 
 Implemented exactly as you described it in your second message:
 
-- Every option is assigned a cheap TikTok gift (default: 🌹 Rose = A, GG = B, 🍦 Ice Cream Cone = C). Sending it picks the option **and** counts its coin value.
-- Any gift a viewer sends after picking adds to their option. A comment "1", "2" or "3" also picks (and can carry a small free "advisory" value, configurable to 0).
+- Every option is assigned a cheap TikTok gift (default: 🌹 Rose = A, GG = B, 🍦 Ice Cream Cone = C). Sending it picks the option **and** counts its coin value. **Gifts are the only vote; comments do nothing.**
+- Any gift a viewer sends after picking adds to their option. A big gift sent before picking waits and lands the moment that viewer sends a Rose, GG or Ice Cream.
 - **The option with the highest total coin value wins**, not the most voters. A 500-coin Galaxy beats three hundred Roses.
 - Tap-combo (streak) gifts are counted once, when the streak ends, at their full total.
 - On the website, credits are the same unit: each tap spends credits on an option and viewers can tap again to add weight. Credits come from Stripe checkout (webhook included).

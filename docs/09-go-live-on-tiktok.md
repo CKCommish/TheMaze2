@@ -44,7 +44,7 @@ As soon as your LIVE is on air, the show (still running from Step 1) connects to
 
 Optional but recommended for busy rooms: a free Euler Stream key (eulerstream.com) in `EULER_API_KEY=` makes the connection more reliable.
 
-Test it: have a friend send a Rose during a vote. Their name appears as a toast on the stream, the A bar grows by 1 coin, and the terminal logs the gift.
+Test it: have a friend send a Rose during a vote. Their name appears as a toast on the stream, the A bar grows by 1 coin, and the terminal logs the gift. Comments do not count: a viewer must send a gift to vote.
 
 ## What viewers see on TikTok
 
@@ -53,8 +53,8 @@ Test it: have a friend send a Rose during a vote. Their name appears as a toast 
 Everything is drawn into the video, because TikTok does not allow custom buttons in its player:
 
 - **Between votes:** the story, with a small line at the top (beat number, time left, location).
-- **When the vote opens** (15 seconds into every beat, the moment the second shot starts): a panel slides up from the bottom with a 10-second countdown and three rows, one per option: the gift icon and name to send ("🌹 Rose" / "🎮 GG" / "🍦 Ice Cream Cone"), the option's title, and a bar that grows with the total coin value of gifts for it. Under it: "Send the gift to vote. Any gift after you pick adds to it. Biggest total wins."
-- **While it is open:** each gift shows as a small toast ("mira_k sent Rose → A"); comments "1", "2" or "3" also pick and show as toasts. TikTok's own gift animations play on top of everything as usual.
+- **When the vote opens** (15 seconds into every beat, the moment the second shot starts): a panel slides up from the bottom with a 10-second countdown and three rows, one per option: the gift icon and name to send ("🌹 Rose" / "🎮 GG" / "🍦 Ice Cream Cone"), the option's title, and a bar that grows with the total coin value of gifts for it. Under it: "Send the gift to vote. Every gift after that adds to your pick. Biggest total wins."
+- **While it is open:** each gift shows as a small toast ("mira_k sent Rose → A"). Comments do nothing (gifts are the only vote). TikTok's own gift animations play on top of everything as usual.
 - **When it closes:** the winning row lights up and a card says "The audience chose: B) Kill the light — 1,240 of 1,900 coins". If nobody voted: "Nobody voted, the careful option wins by default."
 - **The story continues** with the winning option as the fourth clip.
 

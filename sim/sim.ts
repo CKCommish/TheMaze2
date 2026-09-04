@@ -115,7 +115,7 @@ function boot(): void {
     if (!mine()) return;
     S.vote = { opensAt: v.opensAt, closesAt: v.closesAt, closed: false, choices: v.choices };
     S.myPick = undefined;
-    voptsEl.innerHTML = v.choices.map((c) => `<div class="vopt" data-id="${c.id}"><div class="ico">${GIFT_ICON[c.id]}</div><div><div class="lbl">${esc(c.label)}</div><div class="sub">${GIFT_NAME[c.id]} · or type ${c.id === "A" ? 1 : c.id === "B" ? 2 : 3}</div></div><div class="val"></div><div class="fill"></div></div>`).join("");
+    voptsEl.innerHTML = v.choices.map((c) => `<div class="vopt" data-id="${c.id}"><div class="ico">${GIFT_ICON[c.id]}</div><div><div class="lbl">${esc(c.label)}</div><div class="sub">send ${GIFT_NAME[c.id]}</div></div><div class="val"></div><div class="fill"></div></div>`).join("");
     voteEl.classList.add("open");
     winnerEl.classList.remove("show");
     renderTally({ A: 0, B: 0, C: 0 });
@@ -170,7 +170,7 @@ function sendGift(name: string, coins: number, selects: ChoiceId | undefined, wh
   if (mine && selects) S.myPick = selects;
   if (mine && !credited) {
     hintEl.className = "hint err";
-    hintEl.textContent = S.votes.isOpen() ? "That gift was not counted: pick an option first (send a Rose, GG or Ice Cream, or comment 1/2/3)." : "The vote is not open right now. The gift still counts as revenue.";
+    hintEl.textContent = S.votes.isOpen() ? "That gift is waiting: send a Rose, GG or Ice Cream to pick an option and it lands there." : "The vote is not open right now. The gift still counts as revenue.";
   }
   toast(`${who} sent ${name} <b>${coins.toLocaleString()} 🪙</b>${credited ? ` → ${credited}` : ""}`);
   if (S.votes.tally() && before) S.showrunner.notifyTally();
@@ -178,17 +178,6 @@ function sendGift(name: string, coins: number, selects: ChoiceId | undefined, wh
 }
 for (const b of document.querySelectorAll<HTMLButtonElement>(".gift")) {
   b.onclick = () => sendGift(b.dataset.gift!, Number(b.dataset.coins), b.dataset.sel as ChoiceId | undefined, "you", true);
-}
-for (const b of document.querySelectorAll<HTMLButtonElement>(".chip[data-say]")) {
-  b.onclick = () => {
-    const r = S.votes.select("you", b.dataset.say!, "tiktok");
-    const pick = ({ "1": "A", "2": "B", "3": "C" } as Record<string, ChoiceId>)[b.dataset.say!];
-    S.myPick = pick;
-    toast(`you: “${b.dataset.say}”${r.ok ? ` → ${pick}` : ""}`);
-    if (r.ok) S.showrunner.notifyTally();
-    hintEl.className = "hint";
-    hintEl.textContent = r.ok ? `You picked ${pick}. Every gift you send now adds to it.` : S.votes.isOpen() ? `You already picked; your gifts go to ${pick} now.` : "The vote is not open yet; your pick will not carry over.";
-  };
 }
 $("crowd").onclick = () => {
   S.crowd = !S.crowd;
@@ -210,9 +199,10 @@ function startCrowd(): void {
     const who = BOT_NAMES[Math.floor(Math.random() * BOT_NAMES.length)];
     const r = Math.random();
     const pick = Math.random() < 0.5 ? lean : (["A", "B", "C"] as ChoiceId[])[Math.floor(Math.random() * 3)];
-    if (r < 0.04) sendGift("Galaxy", 1000, pick, who, false);
-    else if (r < 0.15) sendGift("Finger Heart", 5, pick, who, false);
-    else if (r < 0.3) sendGift("Perfume", 20, pick, who, false);
+    // bots pick with the option's 1-coin gift, then bigger gifts add to that pick
+    if (r < 0.04) { sendGift(GIFT_NAME[pick], 1, pick, who, false); sendGift("Galaxy", 1000, undefined, who, false); }
+    else if (r < 0.15) { sendGift(GIFT_NAME[pick], 1, pick, who, false); sendGift("Finger Heart", 5, undefined, who, false); }
+    else if (r < 0.3) { sendGift(GIFT_NAME[pick], 1, pick, who, false); sendGift("Perfume", 20, undefined, who, false); }
     else sendGift(GIFT_NAME[pick], 1, pick, who, false);
   }, 380 / Number(($("speed") as HTMLSelectElement).value));
 }

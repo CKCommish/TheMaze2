@@ -38,3 +38,19 @@ test("the resilient planner falls back when the primary fails or hangs", async (
   assert.equal(logs.length, 2);
   assert.match(logs[1], /timed out/);
 });
+
+test("the worked example beat is valid and round-trips through the writer's converter", async () => {
+  const { BeatPlanSchema } = await import("../src/core/index.js");
+  const { EXAMPLE_ANSWER_THE_PHONE, exampleForPrompt } = await import("../src/planner/examples.js");
+  const { toBeatPlan } = await import("../src/planner/claude-planner.js");
+  assert.doesNotThrow(() => BeatPlanSchema.parse(EXAMPLE_ANSWER_THE_PHONE));
+  const llmShaped = JSON.parse(exampleForPrompt());
+  const plan = toBeatPlan(llmShaped, 1, { id: "A", label: "Answer the phone", hook: "", intent: "Rae answers the phone." }, "test");
+  assert.equal(plan.shots.map((s) => s.role).join(","), "setup,action,turn");
+  for (const shot of plan.shots) {
+    assert.match(shot.motion, /\[0-5 seconds\][\s\S]*\[5-10 seconds\][\s\S]*\[10-15 seconds\]/, "motion is time-coded in 5-second blocks");
+    assert.ok(!/gun|knife|pistol|punch/i.test(shot.motion), "TikTok-safe");
+  }
+  assert.equal(plan.nextChoices.map((c) => c.id).join(""), "ABC");
+  assert.equal(plan.stateAfter.heat, 3);
+});

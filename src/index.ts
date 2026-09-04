@@ -123,7 +123,16 @@ const credits = new CreditsLedger({
 if (fs.existsSync(creditsFile)) credits.load(JSON.parse(fs.readFileSync(creditsFile, "utf8")));
 const voteMode = env("VOTE_MODE", "value") === "count" ? "count" : "value";
 const voteCost = Number(env("VOTE_COST", "1"));
-const votes = new VoteEngine({ clock, credits, mode: voteMode, voteCost, chatVotePolicy: env("CHAT_VOTE_POLICY", "free") === "requires_credits" ? "requires_credits" : "free", chatVoteValue: Number(env("CHAT_VOTE_VALUE", "1")) });
+const commentsSelect = env("COMMENTS_SELECT", "false") === "true";
+const votes = new VoteEngine({
+  clock,
+  credits,
+  mode: voteMode,
+  voteCost,
+  chatVotePolicy: env("CHAT_VOTE_POLICY", "free") === "requires_credits" ? "requires_credits" : "free",
+  chatVoteValue: Number(env("CHAT_VOTE_VALUE", "0")),
+  commentsSelect,
+});
 
 // ---- the show ----
 const speculation: Speculation = renderer === "director" ? "none" : (env("SPECULATION", "keyframes") as Speculation);
@@ -165,6 +174,7 @@ const server = createShowServer({
   aspectRatio,
   stripeWebhookSecret: env("STRIPE_WEBHOOK_SECRET") || undefined,
   renderer: falKey ? renderer : "clips",
+  commentsSelect,
   director:
     falKey && renderer === "director"
       ? {

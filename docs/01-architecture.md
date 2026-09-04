@@ -63,10 +63,10 @@ Every clip is re-anchored to the canonical photos, so drift does not accumulate.
 
 `src/core/votes.ts` implements two modes:
 
-- **value** (default): a vote carries a value in coins. Gifts add their coin value (unit price × repeat count); website taps spend credits (1 credit = 1 coin by default). Viewers can keep adding. A comment "1/2/3" or "A/B/C" sets where a viewer's later gifts go. The highest total wins.
+- **value** (default): a vote carries a value in coins. Gifts add their coin value (unit price × repeat count); website taps spend credits (1 credit = 1 coin by default). Viewers can keep adding. The highest total wins. Comments are ignored unless `COMMENTS_SELECT=true`.
 - **count**: one vote per viewer, each worth 1.
 
-Gift routing on TikTok: the three configured gifts (`TIKTOK_GIFT_A/B/C`) both select and count; any other gift counts toward the sender's current selection; a gift with no selection is revenue but not a vote. Streak gifts count once, when the streak ends.
+Gift routing on TikTok: the three configured gifts (`TIKTOK_GIFT_A/B/C`) both pick and count; any other gift counts toward the sender's current pick; a gift sent before picking is held and lands when the sender picks inside the same window (if they never pick, it is revenue, not a vote). Streak gifts count once, when the streak ends.
 
 Credits live in `src/core/credits.ts` (in-memory with a JSON file; swap for a database before launch). Stripe Checkout sessions carrying `metadata.viewerId` and `metadata.credits` are granted by the webhook in `src/server/stripe.ts` after signature verification.
 

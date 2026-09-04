@@ -24,7 +24,7 @@ if (!viewerId) {
 
 let offset = 0, synced = false;
 const now = () => Date.now() + offset;
-let settings = { voteMode: "value", voteCost: 1, coinUsd: 0.0125, giftMap: { A: "Rose", B: "GG", C: "Ice Cream Cone" }, aspectRatio: "16:9", devGrants: false, renderer: "clips", director: null, directorPreamble: "" };
+let settings = { voteMode: "value", voteCost: 1, coinUsd: 0.0125, giftMap: { A: "Rose", B: "GG", C: "Ice Cream Cone" }, aspectRatio: "16:9", devGrants: false, renderer: "clips", director: null, directorPreamble: "", commentsSelect: false };
 let directorStarted = false, directorLive = false;
 const state = { beat: null, np: null, vote: null, credits: null, mine: null, muted: true, fillers: 0, pipeline: null };
 let activeVideo = null;
@@ -190,7 +190,7 @@ const GIFT_EMOJI = { rose: "🌹", gg: "🎮", "ice cream cone": "🍦", tiktok:
 function giftLine(id) {
   const g = settings.giftMap?.[id] || "";
   const e = GIFT_EMOJI[g.toLowerCase()] || "🎁";
-  return `Send ${e} ${g} · or type ${id === "A" ? 1 : id === "B" ? 2 : 3}`;
+  return settings.commentsSelect ? `Send ${e} ${g} · or type ${id === "A" ? 1 : id === "B" ? 2 : 3}` : `Send ${e} ${g}`;
 }
 function openVote(v) {
   state.vote = { ...v, closed: false };
@@ -208,7 +208,7 @@ function openVote(v) {
     </button>`).join("");
   for (const b of els.opts.querySelectorAll(".opt")) b.onclick = () => vote(b.dataset.id);
   els.hint.textContent = TV
-    ? (settings.voteMode === "value" ? "Send the gift for your choice. Bigger gifts count more. Any gift after you pick adds to it." : "One vote per person.")
+    ? (settings.voteMode === "value" ? "Send the gift to vote. Every gift after that adds to your pick. Biggest total wins." : "Send the gift to vote. One vote per person.")
     : (settings.voteMode === "value" ? `Each tap spends ${settings.voteCost} credit${settings.voteCost === 1 ? "" : "s"}. Tap again to add more weight.` : `One vote per person · ${settings.voteCost} credit.`);
   tally(v.tally, 0);
   els.votebox.classList.add("open");
@@ -293,8 +293,10 @@ if (crowdBtn) crowdBtn.onclick = () => {
   for (let i = 0; i < 12; i++) setTimeout(() => {
     const who = BOTS[Math.floor(Math.random() * BOTS.length)];
     const [g, c] = gifts[Math.floor(Math.random() * gifts.length)];
-    if (g === "Finger Heart" || g === "Perfume") simChat(String(1 + Math.floor(Math.random() * 3)), who).then(() => simGift(g, c, who));
-    else simGift(g, c, who);
+    if (g === "Finger Heart" || g === "Perfume") {
+      const pick = [["Rose", "A"], ["GG", "B"], ["Ice Cream Cone", "C"]][Math.floor(Math.random() * 3)][0];
+      simGift(pick, 1, who).then(() => simGift(g, c, who)); // pick with a 1-coin gift, then add the bigger one
+    } else simGift(g, c, who);
   }, i * 350);
 };
 

@@ -8,10 +8,10 @@ const choices: [Choice, Choice, Choice] = [
   { id: "C", label: "C", hook: "", intent: "" },
 ];
 
-function setup(opts: { mode?: VoteMode; voteCost?: number; starter?: number; chatVoteValue?: number } = {}) {
+function setup(opts: { mode?: VoteMode; voteCost?: number; starter?: number; chatVoteValue?: number; commentsSelect?: boolean } = {}) {
   const clock = new FakeClock(0);
   const credits = new CreditsLedger({ starterCredits: opts.starter ?? 3, now: () => clock.now() });
-  const votes = new VoteEngine({ clock, credits, mode: opts.mode ?? "value", voteCost: opts.voteCost ?? 1, chatVotePolicy: "free", chatVoteValue: opts.chatVoteValue ?? 1, random: () => 0.99 });
+  const votes = new VoteEngine({ clock, credits, mode: opts.mode ?? "value", voteCost: opts.voteCost ?? 1, chatVotePolicy: "free", chatVoteValue: opts.chatVoteValue ?? 0, commentsSelect: opts.commentsSelect ?? false, random: () => 0.99 });
   votes.open({ beatIndex: 0, targetBeatIndex: 1, choices, opensAt: 0, closesAt: 5000 });
   return { clock, credits, votes };
 }
@@ -27,11 +27,29 @@ test("value mode: gifts add their coin value to an option and the biggest total 
   assert.equal(votes.close().winner, "B");
 });
 
-test("value mode: a gift after a selection goes to that selection; without one it is not counted", () => {
+test("gifts only: a comment does nothing; a big gift before picking is held and lands on the pick", () => {
   const { votes } = setup();
-  assert.equal(votes.gift({ userId: "u1", source: "tiktok", coins: 99 }), undefined, "no selection yet");
-  assert.equal(votes.uncountedCoins, 99);
-  votes.select("u1", "3", "tiktok"); // typed "3" in chat → C (and a free 1-coin advisory vote)
+  assert.deepEqual(votes.select("u1", "3", "tiktok"), { ok: false, reason: "gifts_only" });
+  assert.deepEqual(votes.cast("u1", "C", "tiktok"), { ok: false, reason: "gifts_only" });
+  assert.equal(votes.gift({ userId: "u1", source: "tiktok", coins: 1000, giftName: "Galaxy" }), undefined, "no pick yet: held");
+  assert.deepEqual(votes.tally(), { A: 0, B: 0, C: 0 });
+  assert.equal(votes.gift({ userId: "u1", source: "tiktok", coins: 1, selects: "C", giftName: "Ice Cream Cone" }), "C");
+  assert.deepEqual(votes.tally(), { A: 0, B: 0, C: 1001 }, "the held Galaxy landed with the Ice Cream");
+  assert.equal(votes.gift({ userId: "u1", source: "tiktok", coins: 20, giftName: "Perfume" }), "C", "later gifts add to the pick");
+  assert.deepEqual(votes.tally(), { A: 0, B: 0, C: 1021 });
+});
+
+test("held gifts that never land are revenue, not votes", () => {
+  const { votes } = setup();
+  votes.gift({ userId: "whale", source: "tiktok", coins: 500 });
+  const r = votes.close();
+  assert.equal(r.reason, "no-votes-default");
+  assert.equal(votes.uncountedCoins, 500);
+});
+
+test("optional: comments may pick (and even count) when the show turns that on", () => {
+  const { votes } = setup({ commentsSelect: true, chatVoteValue: 1 });
+  votes.select("u1", "3", "tiktok"); // typed "3" → C, plus a free 1-coin advisory vote
   assert.equal(votes.gift({ userId: "u1", source: "tiktok", coins: 200, giftName: "Galaxy" }), "C");
   assert.deepEqual(votes.tally(), { A: 0, B: 0, C: 201 });
 });
@@ -75,8 +93,8 @@ test("bad choices are rejected", () => {
   assert.deepEqual(votes.cast("v1", "D"), { ok: false, reason: "bad_choice" });
 });
 
-test("free chat votes count once per user and never touch credits", () => {
-  const { votes, credits } = setup();
+test("free chat votes (when enabled) count once per user and never touch credits", () => {
+  const { votes, credits } = setup({ chatVoteValue: 1 });
   assert.equal(votes.cast("twitch-user", "C", "twitch").ok, true);
   assert.equal(credits.balance("twitch-user"), 0);
   assert.equal(votes.cast("twitch-user", "C", "twitch").ok, false);
@@ -101,7 +119,7 @@ test("decide: majority, tie-break, and no-votes default", () => {
   assert.equal(decide({ A: 2, B: 2, C: 0 }, () => 0).winner, "A");
 });
 
-test("close() is idempotent and clears sticky selections", () => {
+test("close() is idempotent and clears sticky picks", () => {
   const { votes } = setup();
   votes.gift({ userId: "u1", source: "tiktok", coins: 5, selects: "C" });
   const r1 = votes.close();

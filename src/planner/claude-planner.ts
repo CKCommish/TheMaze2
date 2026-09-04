@@ -2,6 +2,7 @@ import Anthropic from "@anthropic-ai/sdk";
 import { zodOutputFormat } from "@anthropic-ai/sdk/helpers/zod";
 import { z } from "zod";
 import { worldSummary, type BeatPlan, type Choice, type Planner, type StoryState } from "../core/index.js";
+import { exampleForPrompt } from "./examples.js";
 
 /**
  * The head writer. Claude plans each 45-second beat as three 15-second shots and writes the next
@@ -60,6 +61,9 @@ STORY RULES
 - Keep continuity with the recent beats, the open threads, heat, cash, allies and inventory. Escalate. Pay something off every 4–6 beats. Reveal the mystery in pieces, never all at once.
 - Heat (0–5) rises with violence and public chaos and falls with stealth or deals. Cash changes with jobs, bribes and losses.
 - stateAfter describes the world after this beat. threads is the full list of open plot threads (max 6). Use null for fields that do not change and empty arrays for nothing added/removed.
+
+EXAMPLE of the format and the quality bar. The audience had just chosen "Answer the phone" after the opening beat ended with a phone ringing inside the stolen bag:
+${exampleForPrompt()}
 
 Respond only with the JSON object.`;
 

@@ -155,7 +155,7 @@ export type VoteSource = "web" | "twitch" | "tiktok" | "youtube" | "kick" | "sim
 
 export interface CastResult {
   ok: boolean;
-  reason?: "closed" | "already_voted" | "no_credits" | "bad_choice";
+  reason?: "closed" | "already_voted" | "no_credits" | "bad_choice" | "gifts_only";
   balance?: number;
 }
 

@@ -29,6 +29,8 @@ export interface ShowServerOptions {
   stripeWebhookSecret?: string;
   /** "clips" (rendered files) or "director" (one continuous H3 Max Director stream). */
   renderer: "clips" | "director";
+  /** Whether a comment "1/2/3" may pick an option. Default false: gifts are the only vote. */
+  commentsSelect: boolean;
   director?: { resolution: "480p" | "768p"; memory: number; sessionSeconds: number; prewarmSeconds: number; token?: string; preamble: string; falKey: string };
   log: (msg: string) => void;
 }
@@ -82,6 +84,7 @@ export function createShowServer(opts: ShowServerOptions): ShowServer {
   const falProxy = opts.director ? createFalProxy({ key: opts.director.falKey, token: opts.director.token, log }) : undefined;
   const settings = () => ({
     renderer: opts.renderer,
+    commentsSelect: opts.commentsSelect,
     director: opts.director ? { resolution: opts.director.resolution, memory: opts.director.memory, sessionSeconds: opts.director.sessionSeconds, prewarmSeconds: opts.director.prewarmSeconds } : null,
     directorPreamble: opts.director?.preamble ?? "",
     voteMode: opts.voteMode,
@@ -111,6 +114,7 @@ export function createShowServer(opts: ShowServerOptions): ShowServer {
       showrunner.notifyTally();
       broadcast({ type: "external_vote", source, displayName: displayName ?? userId, choiceId: parseChoiceForDisplay(text) });
     }
+    // reason "gifts_only": comments are not votes on this show; nothing to show
   };
   const giftExternal = (source: VoteSource, userId: string, coins: number, giftName?: string, displayName?: string) => {
     const selects = giftSelects(opts.giftMap, giftName);
